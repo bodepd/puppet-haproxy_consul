@@ -1,0 +1,31 @@
+{
+  "name": "bodepd-haproxy_consul",
+  "version": "0.0.1",
+  "author": "Dan Bode<dan@bodeco.io>",
+  "summary": "Configures hapoxy to use consul-templates",
+  "license": "Apache-2.0",
+  "source": "https://github.com/bodepd",
+  "project_page": "https://github.com/bodepd/puppet-haproxy_consul",
+  "issues_url": "https://github.com/bodepd/puppet-haproxy_consul/issues",
+  "description": "Configures hapoxy to use consul-templates",
+  "dependencies": [
+    {
+      "name": "puppetlabs/stdlib",
+      "version_requirement": ">= 4.2.0 <5.0.0"
+    },
+    {
+      "name": "gdhbashton/consul_template",
+      "version_requirement": "0.2.0"
+    }
+  ],
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "Ubuntu",
+      "operatingsystemrelease": [
+        "12.04",
+        "14.04",
+        "15.04"
+      ]
+    },
+  ]
+}

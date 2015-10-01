@@ -1,0 +1,38 @@
+<%= scope.function_template(['haproxy/haproxy-base.cfg.erb']) %>
+
+listen lb-stats
+  bind 0.0.0.0:8094
+  mode  http
+  option  httplog
+  stats  enable
+  stats  uri /lb-stats
+
+<% @backends.each do |name, options| -%>
+listen <%= name %>
+<% require 'ipaddr' -%>
+<% Array(options['vip'] || ['0.0.0.0']).uniq.each do |virtual_ip| (Array(options['ports']) || []).each do |port| -%>
+  <%-
+    begin
+      IPAddr.new(virtual_ip)
+      valid_ip = true
+    rescue ArgumentError => e
+      valid_ip = false
+    end
+    if ! valid_ip and ! virtual_ip.match(/^[A-Za-z][A-Za-z0-9\.-]+$/) and virtual_ip != "*"
+      scope.function_fail(["Invalid IP address or hostname [#{virtual_ip}]"])
+    end
+  -%>
+  <%- scope.function_fail(["Port [#{port}] is outside of range 1-65535"]) if port.to_i < 1 or port.to_i > 65535 -%>
+  bind <%= virtual_ip %>:<%= port %> <%= Array(@bind_options).join(" ") %>
+<% end end -%>
+  mode  <%= options['mode'] || 'tcp' %>
+<% listen_options = options['listen_options'] || {'option' => 'tcpka', 'option' => 'abortonclose', 'balance' => 'roundrobin'} -%>
+<% listen_options.sort.each do |key, val| -%>
+<% Array(val).each do |item| -%>
+  <%= key %>  <%= item %>
+<% end -%>
+<% end -%>
+{{range service "<%= options['service_name'] || name %>"}}
+server {{.ID}} {{.Address}}:{{.Port}} <%= options['options'] || 'check inter 10s rise 2 fall 3' %>
+{{end}}
+<% end %>
